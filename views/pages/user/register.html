@@ -61,6 +61,16 @@
 		if("{{.}}" == "用户名已存在!"){
 			$("#msg").show();
 		}
+		$("#username").change(function (){
+			$.post("/checkUsername",{"username":$(this).val()},function (data) {
+				// if(data == "用户名可用!"){
+				// 	$("#msg").css("color","green")
+				// } else{
+				// 	$("#msg").css("color","red")
+				// }
+				$("#msg").show().html(data)
+			});
+		});
 	});
 </script>
 </head>
