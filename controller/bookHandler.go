@@ -8,19 +8,64 @@ import (
 	"strconv"
 )
 
-// GetBooks 获取全部图书
-func GetBooks(w http.ResponseWriter, r *http.Request) {
-	books, _ := dao.GetBooks()
+// IndexHandler 跳转首页
+//func IndexHandler(w http.ResponseWriter, r *http.Request) {
+//	//获取页码
+//	pageNo := r.FormValue("pageNo")
+//	if pageNo == "" {
+//		pageNo = "1"
+//	}
+//	page, _ := dao.GetPageBooks(pageNo)
+//	t := template.Must(template.ParseFiles("views/index.html"))
+//	t.Execute(w, page)
+//}
+
+// GetPageBooks  获取带分页的图书,后台查看用的,前台用ByPrice
+func GetPageBooks(w http.ResponseWriter, r *http.Request) {
+	//获取页码
+	pageNo := r.FormValue("pageNo")
+	if pageNo == "" {
+		pageNo = "1"
+	}
+	page, _ := dao.GetPageBooks(pageNo)
 	//这里是不是可以不用模板,直接用w.Write然后前端对data进行处理, 嫁鸡随鸡嫁狗随狗吧
 	t := template.Must(template.ParseFiles("views/pages/manager/book_manager.html"))
 	//同时跳转页面
-	t.Execute(w, books)
+	t.Execute(w, page)
+}
+
+func GetPageBooksByPrice(w http.ResponseWriter, r *http.Request) {
+	//获取页码
+	pageNo := r.FormValue("pageNo")
+	min := r.FormValue("min")
+	max := r.FormValue("max")
+	if pageNo == "" {
+		pageNo = "1"
+	}
+	page := &model.Page{}
+	if min == "" && max == "" {
+		page, _ = dao.GetPageBooks(pageNo)
+	} else {
+		page, _ = dao.GetPageBooksByPrice(pageNo, min, max)
+		page.MinPrice = min
+		page.MaxPrice = max
+	}
+	//检测用户是否登陆
+	if ok, sess := IsLogin(r); ok {
+		//查到了, 已经登陆
+		page.IsLogin = true
+		page.Username = sess.Username
+	}
+	//这里是不是可以不用模板,直接用w.Write然后前端对data进行处理, 嫁鸡随鸡嫁狗随狗吧
+	t := template.Must(template.ParseFiles("views/index.html"))
+	//同时跳转页面
+	t.Execute(w, page)
 }
 
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	bID := r.FormValue("bID")
 	dao.DeleteBook(bID)
-	GetBooks(w, r)
+	GetPageBooks(w, r)
 }
 
 // EditBook 去更新或者添加图书的页面
@@ -68,5 +113,17 @@ func UpdateOrAddBook(w http.ResponseWriter, r *http.Request) {
 		//添加
 		dao.AddBook(book)
 	}
-	GetBooks(w, r)
+	GetPageBooks(w, r)
+}
+
+func IsLogin(r *http.Request) (bool, *model.Session) {
+	cookie, _ := r.Cookie("user")
+	if cookie != nil {
+		cookieValue := cookie.Value
+		sess, _ := dao.GetSession(cookieValue)
+		if sess.UserID > 0 {
+			return true, sess
+		}
+	}
+	return false, nil
 }

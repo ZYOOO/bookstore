@@ -21,7 +21,7 @@
 			<img class="logo_img" alt="" src="/static/img/logo.gif" >
 			<span class="wel_word">图书管理系统</span>
 			<div>
-				<a href="/getBooks">图书管理</a>
+				<a href="/getPageBooks">图书管理</a>
 				<a href="/main">返回商城</a>
 			</div>
 	</div>
@@ -36,7 +36,7 @@
 				<td>库存</td>
 				<td colspan="2">操作</td>
 			</tr>
-			{{range .}}
+			{{range .Books}}
 			<tr>
 				<td>{{.Title}}</td>
 				<td>{{.Price}}</td>
@@ -57,6 +57,30 @@
 				<td><a href="/editBook">添加图书</a></td>
 			</tr>	
 		</table>
+		<div id="page_nav">
+<!--			这里可以用模板来判断,就把函数放在后台而不是js里面了, 也挺不错的-->
+			{{if .HasPrev}}
+				<a href="/getPageBooks">首页</a>
+				<a href="/getPageBooks?pageNo={{.GetPrevPageNo}}">上一页</a>
+			{{end}}
+				当前是第{{.PageNo}}页, 共{{.TotalPage}}页，{{.TotalRecord}}条记录
+			{{if .HasNext}}
+				<a href="/getPageBooks?pageNo={{.GetNextPageNo}}">下一页</a>
+				<a href="/getPageBooks?pageNo={{.TotalPage}}">末页</a>
+			{{end}}
+				到第<input value="" name="pn" id="pn_input"/>页
+				<input type="button" id="sub" value="确定">
+				<script>
+					$("#sub").click(function (){
+						var pageNo = $("#pn_input").val();
+						if (pageNo > parseInt("{{.TotalPage}}") || pageNo < 1){
+							alert("请输入正确的页码")
+						} else {
+							location = "/getPageBooks?pageNo="+pageNo;
+						}
+					});
+				</script>
+		</div>
 	</div>
 	
 	<div id="bottom">

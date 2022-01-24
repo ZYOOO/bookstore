@@ -1,6 +1,7 @@
-package dao
+package test
 
 import (
+	"bookstore/dao"
 	"bookstore/model"
 	"fmt"
 	"testing"
@@ -19,7 +20,7 @@ var user = &model.User{
 //}
 
 func TestLogin(t *testing.T) {
-	user1, _ := CheckUsernameAndPassword(user.Username+"asdasd", user.Password)
+	user1, _ := dao.CheckUsernameAndPassword(user.Username+"asdasd", user.Password)
 	if user1 != nil {
 		fmt.Println(user1)
 	} else {
@@ -28,8 +29,8 @@ func TestLogin(t *testing.T) {
 }
 
 func TestRegister(t *testing.T) {
-	if !UsernameExisted(user.Username) {
-		SaveUser(user)
+	if !dao.UsernameExisted(user.Username) {
+		dao.SaveUser(user)
 	} else {
 		fmt.Println("username already existed")
 	}

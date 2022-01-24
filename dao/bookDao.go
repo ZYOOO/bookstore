@@ -4,6 +4,7 @@ import (
 	"bookstore/model"
 	"bookstore/utils"
 	"fmt"
+	"strconv"
 )
 
 // GetBooks 获取所有图书
@@ -64,4 +65,73 @@ func UpdateBook(b *model.Book) error {
 		return err
 	}
 	return nil
+}
+
+// GetPageBooks 获取分页的图书信息
+func GetPageBooks(pageNo string) (*model.Page, error) {
+	iPageNo, _ := strconv.ParseInt(pageNo, 10, 64)
+	//获取图书的总记录数
+	sql := "select count(*) from books"
+	var totalRecord int64
+	row := utils.Db.QueryRow(sql)
+	row.Scan(&totalRecord)
+	//设置每页只显示四条记录
+	var pageSize int64 = 4
+	var totalPage int64
+	//获取总页数
+	if totalRecord%pageSize == 0 {
+		totalPage = totalRecord / pageSize
+	} else {
+		totalPage = totalRecord/pageSize + 1
+	}
+	var books []*model.Book
+	sql2 := "select bid,title,author,price,sales,stock,img_path from books limit ?,?"
+	rows, _ := utils.Db.Query(sql2, (iPageNo-1)*pageSize, pageSize)
+	for rows.Next() {
+		book := &model.Book{}
+		rows.Scan(&book.BID, &book.Title, &book.Author, &book.Price, &book.Sales, &book.Stock, &book.ImgPath)
+		books = append(books, book)
+	}
+	page := &model.Page{
+		Books:       books,
+		PageNo:      iPageNo,
+		PageSize:    pageSize,
+		TotalPage:   totalPage,
+		TotalRecord: totalRecord,
+	}
+	return page, nil
+}
+
+func GetPageBooksByPrice(pageNo, min, max string) (*model.Page, error) {
+	iPageNo, _ := strconv.ParseInt(pageNo, 10, 64)
+	//获取图书的总记录数
+	sql := "select count(*) from books where price between  ? and ?"
+	var totalRecord int64
+	row := utils.Db.QueryRow(sql, min, max)
+	row.Scan(&totalRecord)
+	//设置每页只显示四条记录
+	var pageSize int64 = 4
+	var totalPage int64
+	//获取总页数
+	if totalRecord%pageSize == 0 {
+		totalPage = totalRecord / pageSize
+	} else {
+		totalPage = totalRecord/pageSize + 1
+	}
+	var books []*model.Book
+	sql2 := "select bid,title,author,price,sales,stock,img_path from books where price between  ? and ? limit ?,?"
+	rows, _ := utils.Db.Query(sql2, min, max, (iPageNo-1)*pageSize, pageSize)
+	for rows.Next() {
+		book := &model.Book{}
+		rows.Scan(&book.BID, &book.Title, &book.Author, &book.Price, &book.Sales, &book.Stock, &book.ImgPath)
+		books = append(books, book)
+	}
+	page := &model.Page{
+		Books:       books,
+		PageNo:      iPageNo,
+		PageSize:    pageSize,
+		TotalPage:   totalPage,
+		TotalRecord: totalRecord,
+	}
+	return page, nil
 }
