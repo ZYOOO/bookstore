@@ -135,3 +135,15 @@ func GetPageBooksByPrice(pageNo, min, max string) (*model.Page, error) {
 	}
 	return page, nil
 }
+
+//UpdateBookCount 根据购物项中的相关信息更新购物项中图书的数量和金额小计
+func UpdateBookCount(cartItem *model.CartItem) error {
+	//写sql语句
+	sql := "update cart_items set count = ? , amount = ? where book_id = ? and cart_id = ?"
+	//执行
+	_, err := utils.Db.Exec(sql, cartItem.Count, cartItem.GetAmount(), cartItem.Book.BID, cartItem.CartID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

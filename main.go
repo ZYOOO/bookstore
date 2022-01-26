@@ -29,6 +29,28 @@ func main() {
 	http.HandleFunc("/updateOrAddBook", controller.UpdateOrAddBook)
 	//价格查询
 	http.HandleFunc("/getPageBooksByPrice", controller.GetPageBooksByPrice)
+	//添加图书到购物车
+	http.HandleFunc("/addBookToCart", controller.AddBookToCart)
+	//获取购物车信息
+	http.HandleFunc("/getCartInfo", controller.GetCartInfo)
+	//清空购物车
+	http.HandleFunc("/clearCart", controller.ClearCart)
+	//删除单项
+	http.HandleFunc("/deleteCartItem", controller.DeleteCartItem)
+	//更新购物项
+	http.HandleFunc("/updateCartItem", controller.UpdateCartItem)
+	//去结账
+	http.HandleFunc("/checkout", controller.Checkout)
+	//获取所有订单
+	http.HandleFunc("/getOrders", controller.GetOrders)
+	//订单详情
+	http.HandleFunc("/getOrderInfo", controller.GetOrderInfo)
+	//获取我的订单
+	http.HandleFunc("/getMyOrder", controller.GetMyOrders)
+	//发货
+	http.HandleFunc("/sendOrder", controller.SendOrder)
+	//确认收货
+	http.HandleFunc("/takeOrder", controller.TakeOrder)
 	//开启对端口8080的监听
 	http.ListenAndServe(":8080", nil)
 }
